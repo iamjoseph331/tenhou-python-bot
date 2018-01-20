@@ -16,7 +16,7 @@ from tenhou.decoder import TenhouDecoder
 from utils.settings_handler import settings
 from utils.statistics import Statistics
 
-logger = logging.getLogger('tenhou')
+logger = logging.getLogger('tenhou2')
 
 
 class TenhouClient(Client):
@@ -56,12 +56,12 @@ class TenhouClient(Client):
         auth_message = messages[0]
 
         if not auth_message:
-            logger.info("Auth message wasn't received")
+            # logger.info("Auth message wasn't received")
             return False
 
         # we reconnected to the game
         if '<GO' in auth_message:
-            logger.info('Successfully reconnected')
+            # logger.info('Successfully reconnected')
             self.reconnected_messages = messages
 
             selected_game_type = self.decoder.parse_go_tag(auth_message)
@@ -75,11 +75,11 @@ class TenhouClient(Client):
         auth_string, rating_string, new_rank_message = self.decoder.parse_hello_string(auth_message)
         self._rating_string = rating_string
         if not auth_string:
-            logger.info("We didn't obtain auth string")
+            # logger.info("We didn't obtain auth string")
             return False
 
-        if new_rank_message:
-            logger.info('Achieved a new rank! \n {}'.format(new_rank_message))
+        # if new_rank_message:
+        #     logger.info('Achieved a new rank! \n {}'.format(new_rank_message))
 
         auth_token = self.decoder.generate_auth_token(auth_string)
 
@@ -107,10 +107,10 @@ class TenhouClient(Client):
 
         if authenticated:
             self._send_keep_alive_ping()
-            logger.info('Successfully authenticated')
+            # logger.info('Successfully authenticated')
             return True
         else:
-            logger.info('Failed to authenticate')
+            # logger.info('Failed to authenticate')
             return False
 
     def start_game(self):
@@ -119,12 +119,12 @@ class TenhouClient(Client):
         # play in private or tournament lobby
         if settings.LOBBY != '0':
             if settings.IS_TOURNAMENT:
-                logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
+                # logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CS lobby="{}" />'.format(settings.LOBBY))
                 sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS * 2)
                 self._send_message('<DATE />')
             else:
-                logger.info('Go to the lobby: {}'.format(settings.LOBBY))
+                # logger.info('Go to the lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
                 sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS * 2)
 
@@ -139,7 +139,7 @@ class TenhouClient(Client):
 
             if not settings.IS_TOURNAMENT:
                 self._send_message('<JOIN t="{}" />'.format(game_type))
-                logger.info('Looking for the game...')
+                # logger.info('Looking for the game...')
 
             start_time = datetime.datetime.now()
 
@@ -154,8 +154,8 @@ class TenhouClient(Client):
                         self._send_message('<JOIN t="{},r" />'.format(game_type))
 
                     if '<GO' in message:
-                        self._send_message('<GOK />')
-                        self._send_message('<NEXTREADY />')
+                        # self._send_message('<GOK />')
+                        # self._send_message('<NEXTREADY />')
 
                         # we had to have it there
                         # because for tournaments we don't know
@@ -193,13 +193,13 @@ class TenhouClient(Client):
         # sometimes it happens and we need to end process
         # and try again later
         if self.looking_for_game:
-            logger.error('Game is not started. Can\'t find the game')
+            # logger.error('Game is not started. Can\'t find the game')
             self.end_game()
             return
 
-        logger.info('Game started')
-        logger.info('Log: {}'.format(log_link))
-        logger.info('Players: {}'.format(self.table.players))
+        # logger.info('Game started')
+        # logger.info('Log: {}'.format(log_link))
+        # logger.info('Players: {}'.format(self.table.players))
 
         main_player = self.table.player
 
@@ -235,11 +235,11 @@ class TenhouClient(Client):
                     tiles = self.decoder.parse_initial_hand(message)
                     self.table.player.init_hand(tiles)
 
-                    logger.info(self.table.__str__())
-                    logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
-                    logger.info('Dealer: {}'.format(self.table.get_player(values['dealer'])))
-                    logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
-                    logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
+                    # logger.info(self.table.__str__())
+                    # logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
+                    # logger.info('Dealer: {}'.format(self.table.get_player(values['dealer'])))
+                    # logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
+                    # logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
 
                 if '<REINIT' in message:
                     players = self.decoder.parse_table_state_after_reconnection(message)
@@ -265,7 +265,7 @@ class TenhouClient(Client):
                     drawn_tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:
-                        logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
+                        # logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 
                         self.player.draw_tile(drawn_tile)
                         sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
@@ -277,11 +277,11 @@ class TenhouClient(Client):
                             else:
                                 meld_type = 4
                             self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
-                            logger.info('We called a closed kan\chankan set!')
+                            # logger.info('We called a closed kan\chankan set!')
                             continue
 
                         discarded_tile = self.player.discard_tile()
-                        logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
+                        # logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
 
                         can_call_riichi = main_player.can_call_riichi()
 
@@ -298,18 +298,18 @@ class TenhouClient(Client):
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
 
-                    logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
+                    # logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 
                 # new dora indicator after kan
                 if '<DORA' in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
-                    logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
+                    # logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
 
                 if '<REACH' in message and 'step="1"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
                     self.table.add_called_riichi(who_called_riichi)
-                    logger.info('Riichi called by {} player'.format(who_called_riichi))
+                    # logger.info('Riichi called by {} player'.format(who_called_riichi))
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
@@ -324,7 +324,7 @@ class TenhouClient(Client):
 
                     meld = self.decoder.parse_meld(message)
                     self.table.add_called_meld(meld.who, meld)
-                    logger.info('Meld: {} by {}'.format(meld, meld.who))
+                    # logger.info('Meld: {} by {}'.format(meld, meld.who))
 
                     # tenhou confirmed that we called a meld
                     # we had to do discard after this
@@ -332,10 +332,10 @@ class TenhouClient(Client):
                         if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
                             discarded_tile = self.player.discard_tile(tile_to_discard)
 
-                            logger.info('With hand: {}'.format(player_formatted_hand))
-                            logger.info('Discard tile after called meld: {}'.format(
-                                TilesConverter.to_one_line_string([discarded_tile]))
-                            )
+                            # logger.info('With hand: {}'.format(player_formatted_hand))
+                            # logger.info('Discard tile after called meld: {}'.format(
+                            #     TilesConverter.to_one_line_string([discarded_tile]))
+                            # )
 
                             self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))
@@ -380,7 +380,7 @@ class TenhouClient(Client):
                         if 't="3"' in message:
                             if self.player.should_call_kan(tile, True):
                                 self._send_message('<N type="2" />')
-                                logger.info('We called an open kan set!')
+                                # logger.info('We called an open kan set!')
                                 continue
 
                         # chi or pon
@@ -420,11 +420,11 @@ class TenhouClient(Client):
                     self.game_is_continue = False
 
             if self._count_of_empty_messages >= 5:
-                logger.error('We are getting empty messages from socket. Probably socket connection was closed')
+                # logger.error('We are getting empty messages from socket. Probably socket connection was closed')
                 self.end_game(False)
                 return
 
-        logger.info('Final results: {}'.format(self.table.get_players_sorted_by_scores()))
+        # logger.info('Final results: {}'.format(self.table.get_players_sorted_by_scores()))
 
         # we need to finish the game, and only after this try to send statistics
         # if order will be different, tenhou will return 404 on log download endpoint
@@ -435,7 +435,7 @@ class TenhouClient(Client):
         if settings.STAT_SERVER_URL:
             sleep(60)
             result = self.statistics.send_statistics()
-            logger.info('Statistics sent: {}'.format(result))
+            # logger.info('Statistics sent: {}'.format(result))
 
     def end_game(self, success=True):
         self.game_is_continue = False
@@ -451,10 +451,10 @@ class TenhouClient(Client):
         except OSError:
             pass
 
-        if success:
-            logger.info('End of the game')
-        else:
-            logger.error('Game was ended without success')
+        # if success:
+        #     logger.info('End of the game')
+        # else:
+        #     logger.error('Game was ended without success')
 
     def _send_message(self, message):
         # tenhou requires an empty byte in the end of each sending message
@@ -510,17 +510,17 @@ class TenhouClient(Client):
         default_game_type = '9'
 
         if settings.LOBBY != '0':
-            logger.error("We can't use dynamic game type and custom lobby. Default game type was set")
+            # logger.error("We can't use dynamic game type and custom lobby. Default game type was set")
             return default_game_type
 
         if not self._rating_string:
-            logger.error("For NoName dynamic game type is not available. Default game type was set")
+            # logger.error("For NoName dynamic game type is not available. Default game type was set")
             return default_game_type
 
         temp = self._rating_string.split(',')
         dan = int(temp[0])
         rate = float(temp[2])
-        logger.info('Player has {} rank and {} rate'.format(TenhouDecoder.RANKS[dan], rate))
+        # logger.info('Player has {} rank and {} rate'.format(TenhouDecoder.RANKS[dan], rate))
 
         game_type = default_game_type
         # dan lobby, we can play here from 1 kyu
@@ -558,9 +558,9 @@ class TenhouClient(Client):
         self.table.has_aka_dora = is_aka
         self.table.has_open_tanyao = is_open_tanyao
 
-        logger.info('Game settings:')
-        logger.info('Aka dora: {}'.format(self.table.has_aka_dora))
-        logger.info('Open tanyao: {}'.format(self.table.has_open_tanyao))
-        logger.info('Game type: {}'.format(is_hanchan and 'hanchan' or 'tonpusen'))
-
+        # logger.info('Game settings:')
+        # logger.info('Aka dora: {}'.format(self.table.has_aka_dora))
+        # logger.info('Open tanyao: {}'.format(self.table.has_open_tanyao))
+        # logger.info('Game type: {}'.format(is_hanchan and 'hanchan' or 'tonpusen'))
+        #
         return True
