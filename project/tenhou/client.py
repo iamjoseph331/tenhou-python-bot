@@ -154,8 +154,8 @@ class TenhouClient(Client):
                         self._send_message('<JOIN t="{},r" />'.format(game_type))
 
                     if '<GO' in message:
-                        # self._send_message('<GOK />')
-                        # self._send_message('<NEXTREADY />')
+                        self._send_message('<GOK />')
+                        self._send_message('<NEXTREADY />')
 
                         # we had to have it there
                         # because for tournaments we don't know
