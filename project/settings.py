@@ -3,17 +3,12 @@
 TENHOU_HOST = '133.242.10.78'
 TENHOU_PORT = 10080
 
-<<<<<<< HEAD
-USER_ID = 'ID783C2D72-CN4AmUaY'
-
-LOBBY = '3191'
-WAITING_GAME_TIMEOUT_MINUTES = 100
-=======
-USER_ID = 'NoName'
+USER_ID = 'ID2A1F7A93-EBaQm8H8'
+# Bot1: ID783C2D72-CN4AmUaY
+# Bot2: ID2A1F7A93-EBaQm8H8
 
 LOBBY = '0'
-WAITING_GAME_TIMEOUT_MINUTES = 10
->>>>>>> 16674947a2f74e3f00ca9afba8064ab3c26b1066
+WAITING_GAME_TIMEOUT_MINUTES = 100
 
 # in tournament mode bot is not trying to search the game
 # it just sitting in the lobby and waiting for the game start
@@ -22,7 +17,7 @@ IS_TOURNAMENT = False
 STAT_SERVER_URL = ''
 STAT_TOKEN = ''
 
-AI_PACKAGE = 'first_version'
+AI_PACKAGE = 'third_version'
 # class will be loaded automatically
 AI_CLASS = None
 
